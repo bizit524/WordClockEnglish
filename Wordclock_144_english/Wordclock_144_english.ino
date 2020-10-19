@@ -116,8 +116,18 @@ void setup()
   Serial.println("Booted");
   Serial.println("Connecting to Wi-Fi");
 // We start by connecting to a WiFi network
+  // The extra parameters to be configured (can be either global or just in the setup)
+  // After connecting, parameter.getValue() will get you the configured value
+  // id/name placeholder/prompt default length
+  WiFiManagerParameter custom_night_mode("Night Mode", "yes/no", night_mode, 3);
+  WiFiManagerParameter custom_dst("Turn on DST?", "enable/disable", dst, 7);
+
+
+  
   WiFiManager MyWifiManager;
   MyWifiManager.autoConnect("Word Clock");
+  wifiManager.addParameter(&custom_night_mode);
+  wifiManager.addParameter(&custom_dst);
   Serial.println("WiFi connected");
   pixels.setBrightness(dayBrightness);
   startMillis = millis();  //initial start time
