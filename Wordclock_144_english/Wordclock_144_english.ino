@@ -24,15 +24,6 @@ int debugging = 1;
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
  
 byte second, minute, hour, dayOfWeek, month, year;
-byte decToBcd(byte val)
-{
-  return ( (val / 10 * 16) + (val % 10) );
-}
-// Convert binary coded decimal to normal decimal numbers
-byte bcdToDec(byte val)
-{
-  return ( (val / 16 * 10) + (val % 16) );
-}
 
 
 
@@ -119,15 +110,15 @@ void setup()
   // The extra parameters to be configured (can be either global or just in the setup)
   // After connecting, parameter.getValue() will get you the configured value
   // id/name placeholder/prompt default length
-  WiFiManagerParameter custom_night_mode("Night Mode", "yes/no", night_mode, 3);
-  WiFiManagerParameter custom_dst("Turn on DST?", "enable/disable", dst, 7);
+//  WiFiManagerParameter custom_night_mode("Night Mode", "yes/no", night_mode, 3);
+ // WiFiManagerParameter custom_dst("Turn on DST?", "enable/disable", dst, 7);
 
 
   
   WiFiManager MyWifiManager;
   MyWifiManager.autoConnect("Word Clock");
-  wifiManager.addParameter(&custom_night_mode);
-  wifiManager.addParameter(&custom_dst);
+ // MyWifiManager.addParameter(&custom_night_mode);
+//  MyWifiManager.addParameter(&custom_dst);
   Serial.println("WiFi connected");
   pixels.setBrightness(dayBrightness);
   startMillis = millis();  //initial start time
