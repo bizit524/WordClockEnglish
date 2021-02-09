@@ -1,5 +1,6 @@
 #include <NTPtimeESP.h>
-NTPtime NTPch("uk.pool.ntp.org");   // Choose server pool as required
+NTPtime NTPch("pool.ntp.org");   // Choose server pool as required
+//NTPtime NTPch("192.168.20.16");
 strDateTime dateTime;
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
@@ -15,9 +16,9 @@ unsigned long startMillis;  //some global variables available anywhere in the pr
 unsigned long currentMillis;
 
 //change update values if debugging is on to make debugging quicker
-const unsigned long period = 10000;
+const unsigned long period = 20000;
 //change to 0 for debugging 1 is normal operation 
-int debugging = 1;
+const int debugging = 1;
 
 
 
@@ -86,7 +87,7 @@ uint32_t darkblue = pixels.Color(0, 0, 255);
 
 //values for brightness
 int dayBrightness = 100;
-int nightBrightness = 30;
+int nightBrightness = 10;
 //values for debugging hour/day  i increment 
 byte i;
 byte h ;
@@ -96,7 +97,7 @@ void setup()
 {
   //used for manual debugging/ set start time 
    i = 0 ;
-   h = 8;
+   h = 4;
    d = 1;
   //start pixels
   pixels.begin();
@@ -138,8 +139,9 @@ void loop()
 {
 
   TimeOfDay(); //set brightness dependant on time of day
-  displayTime(); // display the real-time clock data on the Serial Monitor  and the LEDS,
-
+ // displayTime(); // display the real-time clock data on the Serial Monitor  and the LEDS,
+  readtime(&second, &minute, &hour, &dayOfWeek, &month, &year);  
+  NTPch.printDateTime(dateTime);
   //home time serial for debugging if statements
   if ((dayOfWeek != 1) && (dayOfWeek != 7)) {
     if (hour == 17) {
@@ -437,7 +439,7 @@ void loop()
         lightup(WordTwo, Black);
         lightup(WordThree, Black);
        // lightup(WordFour, Black);
-       // lightup(WordFive, Black);
+       // lightup(WordFive, Black);//
         lightup(WordSix, White);
         lightup(WordSeven, Black);
         lightup(WordEight, Black);
@@ -889,24 +891,13 @@ void loop()
 void TimeOfDay() {
   //Used to set brightness dependant of time of day - lights dimmed at night
 
-  //monday to thursday and sunday
-
-  if ((dayOfWeek == 6) | (dayOfWeek == 7)) {
-    if ((hour > 0) && (hour < 8)) {
-      pixels.setBrightness(nightBrightness);
-    }
-    else {
-      pixels.setBrightness(dayBrightness);
-    }
-  }
-  else {
     if ((hour < 6) | (hour >= 22)) {
       pixels.setBrightness(nightBrightness);
     }
     else {
       pixels.setBrightness(dayBrightness);
     }
-  }
+  
 }
 
 void displayTime()
@@ -914,24 +905,24 @@ void displayTime()
     
   //rate limit the time check 
   currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
-  if (currentMillis - startMillis >= period)  //test whether the period has elapsed
-  {
-    Serial.println("Time Check rate reached");
+ // if (currentMillis - startMillis >= period)  //test whether the period has elapsed
+ // {
+   // Serial.println("Time Check rate reached");
     readtime(&second, &minute, &hour, &dayOfWeek, &month, &year);  
     startMillis = currentMillis;  //IMPORTANT to save the start time of the current LED state.
-
-  }
-        if (hour < 10) {
-      Serial.print("0");
-    }
-    Serial.print(hour);
-    Serial.print(":");
-  
-    if (minute < 10) {
-      Serial.print("0");
-    }
-    Serial.println(minute);
-    delay(500);
+     delay(100);
+ // }
+//        if (hour < 10) {
+//      Serial.print("0");
+//    }
+//    Serial.print(hour);
+//    Serial.print(":");
+//  
+//    if (minute < 10) {
+//      Serial.print("0");
+//    }
+//    Serial.println(minute);
+   
 
 }
 
@@ -939,7 +930,9 @@ void displayTime()
 
 void readtime(byte *second, byte *minute, byte *hour, byte *dayOfWeek, byte *month, byte *year) {
   if (debugging == 1){
+     
       dateTime = NTPch.getNTPtime(0.0, 1);
+      NTPch.setSendInterval(5);
       if(dateTime.valid){
       *second = dateTime.second;
       *minute = dateTime.minute;
@@ -956,6 +949,7 @@ void readtime(byte *second, byte *minute, byte *hour, byte *dayOfWeek, byte *mon
         if (i == 59){
            h++;
            *hour = h;
+           Serial.println(h);
            i = 0;
         }
         i++;
@@ -965,12 +959,22 @@ void readtime(byte *second, byte *minute, byte *hour, byte *dayOfWeek, byte *mon
 
 
       if (h >23){
+        if (d < 7)
+        {
+          d++;
+          Serial.println(d);
+          if (d>7)
+          {
+            d=0;
+          }
+        }
         h =0;}
       
       *second = dateTime.second;
       *dayOfWeek = d;
       *month = dateTime.month;
       *year = dateTime.year;   
+      //delay (200);
       }
  
 }
@@ -1041,7 +1045,7 @@ void wipe() {
     delay(30);
     pixels.show();
   }
-  delay(700);
+  delay(100);
   blank();
 
 }
